@@ -309,29 +309,37 @@ body {
     border-radius: 12px;
     padding: 1rem;
     box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.3);
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 #drawing-canvas {
     display: block;
-    margin: 0 auto;
     border: 2px solid var(--color-border);
     border-radius: 8px;
     cursor: crosshair;
     background: #ffffff;
+    position: relative;
+    z-index: 1;
 }
 
 .bit-overlay {
     position: absolute;
-    top: calc(1rem + 2px);
-    left: calc(1rem + 2px);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     width: 480px;
     height: 480px;
     pointer-events: none;
     display: grid;
+    grid-template-columns: repeat(16, 30px);
+    grid-template-rows: repeat(16, 30px);
     gap: 0;
     font-family: 'JetBrains Mono', monospace;
     font-size: 0.7rem;
     font-weight: 600;
+    z-index: 2;
 }
 
 .bit-overlay.hidden {
