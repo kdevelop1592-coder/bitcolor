@@ -10,17 +10,17 @@
     --color-text-primary: #ffffff;
     --color-text-secondary: #b8b8d1;
     --color-border: #2d2d44;
-    
+
     --bit-black: #1a1a1a;
     --bit-blue: #4169e1;
     --bit-yellow: #ffd700;
     --bit-gray: #a9a9a9;
-    
+
     --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
     --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
     --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
     --shadow-glow: 0 0 20px rgba(108, 99, 255, 0.3);
-    
+
     --transition-fast: 0.2s ease;
     --transition-normal: 0.3s ease;
 }
@@ -141,10 +141,21 @@ body {
     transform: scale(1.1);
 }
 
-.color-black { background-color: var(--bit-black); }
-.color-blue { background-color: var(--bit-blue); }
-.color-yellow { background-color: var(--bit-yellow); }
-.color-gray { background-color: var(--bit-gray); }
+.color-black {
+    background-color: var(--bit-black);
+}
+
+.color-blue {
+    background-color: var(--bit-blue);
+}
+
+.color-yellow {
+    background-color: var(--bit-yellow);
+}
+
+.color-gray {
+    background-color: var(--bit-gray);
+}
 
 .color-name {
     font-size: 1.1rem;
@@ -311,13 +322,13 @@ body {
 
 .bit-overlay {
     position: absolute;
-    top: 1rem;
-    left: 1rem;
-    right: 1rem;
-    bottom: 1rem;
+    top: calc(1rem + 2px);
+    left: calc(1rem + 2px);
+    width: 480px;
+    height: 480px;
     pointer-events: none;
     display: grid;
-    gap: 1px;
+    gap: 0;
     font-family: 'JetBrains Mono', monospace;
     font-size: 0.7rem;
     font-weight: 600;
@@ -328,12 +339,19 @@ body {
 }
 
 .bit-cell {
+    width: 30px;
+    height: 30px;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: rgba(255, 255, 255, 0.8);
-    text-shadow: 0 0 3px rgba(0, 0, 0, 0.8), 0 0 6px rgba(0, 0, 0, 0.6);
-    background: rgba(0, 0, 0, 0.1);
+    color: rgba(255, 255, 255, 0.9);
+    text-shadow:
+        -1px -1px 0 rgba(0, 0, 0, 0.8),
+        1px -1px 0 rgba(0, 0, 0, 0.8),
+        -1px 1px 0 rgba(0, 0, 0, 0.8),
+        1px 1px 0 rgba(0, 0, 0, 0.8),
+        0 0 4px rgba(0, 0, 0, 1);
+    font-size: 0.65rem;
 }
 
 /* Quiz */
@@ -493,6 +511,7 @@ body {
         opacity: 0;
         transform: translateY(-20px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -504,6 +523,7 @@ body {
         opacity: 0;
         transform: translateY(20px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -515,28 +535,28 @@ body {
     .container {
         padding: 1rem;
     }
-    
+
     .title {
         font-size: 2rem;
     }
-    
+
     .reference-table {
         grid-template-columns: repeat(2, 1fr);
     }
-    
+
     .mode-selector {
         flex-direction: column;
     }
-    
+
     .controls {
         flex-direction: column;
         align-items: stretch;
     }
-    
+
     .color-palette {
         justify-content: center;
     }
-    
+
     .quiz-stats {
         grid-template-columns: 1fr;
     }
