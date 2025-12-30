@@ -23,13 +23,157 @@ let quizWrong = 0;
 let currentQuizAnswer = null;
 let quizAnswered = false;
 
+// Color Customization State
+let currentEditingBit = null;
+
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
+    loadCustomColors();
     initCanvas();
     initDrawingMode();
     initQuizMode();
     initModeSelector();
+    initColorCustomization();
 });
+
+// Color Customization Functions
+function loadCustomColors() {
+    const savedColors = localStorage.getItem('bitColors');
+    if (savedColors) {
+        try {
+            const colors = JSON.parse(savedColors);
+            Object.keys(colors).forEach(bit => {
+                if (BIT_COLORS[bit]) {
+                    BIT_COLORS[bit].color = colors[bit];
+                    updateColorInUI(bit, colors[bit]);
+                }
+            });
+        } catch (e) {
+            console.error('Failed to load custom colors:', e);
+        }
+    }
+}
+
+function saveCustomColors() {
+    const colors = {};
+    Object.keys(BIT_COLORS).forEach(bit => {
+        colors[bit] = BIT_COLORS[bit].color;
+    });
+    localStorage.setItem('bitColors', JSON.stringify(colors));
+}
+
+function updateColorInUI(bit, color) {
+    // Update CSS variables
+    const cssVarMap = {
+        '00': '--bit-black',
+        '01': '--bit-blue',
+        '10': '--bit-yellow',
+        '11': '--bit-gray'
+    };
+
+    if (cssVarMap[bit]) {
+        document.documentElement.style.setProperty(cssVarMap[bit], color);
+    }
+
+    // Update reference table color box
+    const referenceItem = document.querySelector(`.reference-item[data-bit="${bit}"]`);
+    if (referenceItem) {
+        const colorBox = referenceItem.querySelector('.color-box');
+        if (colorBox) {
+            colorBox.style.backgroundColor = color;
+        }
+    }
+
+    // Update palette button
+    const paletteBtn = document.querySelector(`.palette-btn[data-color="${bit}"]`);
+    if (paletteBtn) {
+        const paletteColor = paletteBtn.querySelector('.palette-color');
+        if (paletteColor) {
+            paletteColor.style.backgroundColor = color;
+        }
+    }
+
+    // Redraw canvas if needed
+    if (typeof drawGrid === 'function') {
+        drawGrid();
+    }
+}
+
+function initColorCustomization() {
+    const modal = document.getElementById('color-edit-modal');
+    const hexInput = document.getElementById('hex-input');
+    const colorPicker = document.getElementById('color-picker');
+    const colorPreview = document.getElementById('color-preview');
+    const saveBtn = document.getElementById('save-color');
+    const cancelBtn = document.getElementById('cancel-edit');
+    const closeBtn = document.getElementById('close-modal');
+    const overlay = modal.querySelector('.modal-overlay');
+
+    // Edit button click handlers
+    document.querySelectorAll('.edit-color-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const referenceItem = btn.closest('.reference-item');
+            const bit = referenceItem.dataset.bit;
+            openColorModal(bit);
+        });
+    });
+
+    // Hex input change
+    hexInput.addEventListener('input', (e) => {
+        const value = e.target.value;
+        if (/^#[0-9A-Fa-f]{6}$/.test(value)) {
+            colorPicker.value = value;
+            colorPreview.style.backgroundColor = value;
+        }
+    });
+
+    // Color picker change
+    colorPicker.addEventListener('input', (e) => {
+        const value = e.target.value;
+        hexInput.value = value;
+        colorPreview.style.backgroundColor = value;
+    });
+
+    // Save button
+    saveBtn.addEventListener('click', () => {
+        if (currentEditingBit && /^#[0-9A-Fa-f]{6}$/.test(hexInput.value)) {
+            BIT_COLORS[currentEditingBit].color = hexInput.value;
+            updateColorInUI(currentEditingBit, hexInput.value);
+            saveCustomColors();
+            closeColorModal();
+        }
+    });
+
+    // Cancel/Close buttons
+    cancelBtn.addEventListener('click', closeColorModal);
+    closeBtn.addEventListener('click', closeColorModal);
+    overlay.addEventListener('click', closeColorModal);
+}
+
+function openColorModal(bit) {
+    currentEditingBit = bit;
+    const modal = document.getElementById('color-edit-modal');
+    const hexInput = document.getElementById('hex-input');
+    const colorPicker = document.getElementById('color-picker');
+    const colorPreview = document.getElementById('color-preview');
+    const bitValue = document.getElementById('edit-bit-value');
+
+    const currentColor = BIT_COLORS[bit].color;
+
+    bitValue.textContent = bit;
+    hexInput.value = currentColor;
+    colorPicker.value = currentColor;
+    colorPreview.style.backgroundColor = currentColor;
+
+    modal.classList.remove('hidden');
+}
+
+function closeColorModal() {
+    const modal = document.getElementById('color-edit-modal');
+    modal.classList.add('hidden');
+    currentEditingBit = null;
+}
 
 // Canvas Initialization
 function initCanvas() {
@@ -42,17 +186,17 @@ function initCanvas() {
 function drawGrid() {
     const canvas = document.getElementById('drawing-canvas');
     const ctx = canvas.getContext('2d');
-    
+
     ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
-    
+
     for (let row = 0; row < GRID_SIZE; row++) {
         for (let col = 0; col < GRID_SIZE; col++) {
             const bitValue = gridData[row][col];
             const color = BIT_COLORS[bitValue].color;
-            
+
             ctx.fillStyle = color;
             ctx.fillRect(col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE);
-            
+
             ctx.strokeStyle = '#e0e0e0';
             ctx.lineWidth = 1;
             ctx.strokeRect(col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE);
@@ -65,7 +209,7 @@ function updateBitOverlay() {
     overlay.innerHTML = '';
     overlay.style.gridTemplateColumns = `repeat(${GRID_SIZE}, 1fr)`;
     overlay.style.gridTemplateRows = `repeat(${GRID_SIZE}, 1fr)`;
-    
+
     for (let row = 0; row < GRID_SIZE; row++) {
         for (let col = 0; col < GRID_SIZE; col++) {
             const cell = document.createElement('div');
@@ -79,7 +223,7 @@ function updateBitOverlay() {
 // Drawing Mode
 function initDrawingMode() {
     const canvas = document.getElementById('drawing-canvas');
-    
+
     // Palette buttons
     document.querySelectorAll('.palette-btn').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -88,21 +232,21 @@ function initDrawingMode() {
             currentColor = btn.dataset.color;
         });
     });
-    
+
     // Canvas drawing
     canvas.addEventListener('mousedown', startDrawing);
     canvas.addEventListener('mousemove', draw);
     canvas.addEventListener('mouseup', stopDrawing);
     canvas.addEventListener('mouseleave', stopDrawing);
-    
+
     // Touch support
     canvas.addEventListener('touchstart', handleTouchStart);
     canvas.addEventListener('touchmove', handleTouchMove);
     canvas.addEventListener('touchend', stopDrawing);
-    
+
     // Clear button
     document.getElementById('clear-canvas').addEventListener('click', clearCanvas);
-    
+
     // Toggle bits button
     document.getElementById('toggle-bits').addEventListener('click', toggleBits);
 }
@@ -114,15 +258,15 @@ function startDrawing(e) {
 
 function draw(e) {
     if (!isDrawing) return;
-    
+
     const canvas = document.getElementById('drawing-canvas');
     const rect = canvas.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
-    
+
     const col = Math.floor(x / CELL_SIZE);
     const row = Math.floor(y / CELL_SIZE);
-    
+
     if (row >= 0 && row < GRID_SIZE && col >= 0 && col < GRID_SIZE) {
         gridData[row][col] = currentColor;
         drawGrid();
@@ -143,16 +287,16 @@ function handleTouchStart(e) {
 function handleTouchMove(e) {
     if (!isDrawing) return;
     e.preventDefault();
-    
+
     const canvas = document.getElementById('drawing-canvas');
     const rect = canvas.getBoundingClientRect();
     const touch = e.touches[0];
     const x = touch.clientX - rect.left;
     const y = touch.clientY - rect.top;
-    
+
     const col = Math.floor(x / CELL_SIZE);
     const row = Math.floor(y / CELL_SIZE);
-    
+
     if (row >= 0 && row < GRID_SIZE && col >= 0 && col < GRID_SIZE) {
         gridData[row][col] = currentColor;
         drawGrid();
@@ -169,7 +313,7 @@ function clearCanvas() {
 function toggleBits() {
     showBits = !showBits;
     const overlay = document.getElementById('bit-overlay');
-    
+
     if (showBits) {
         overlay.classList.remove('hidden');
         updateBitOverlay();
@@ -189,12 +333,12 @@ function initQuizMode() {
 function generateQuiz() {
     quizAnswered = false;
     document.getElementById('quiz-feedback').classList.add('hidden');
-    
+
     // Generate random pattern
     const size = Math.floor(Math.random() * 3) + 3; // 3x3 to 5x5
     const pattern = [];
     const bits = Object.keys(BIT_COLORS);
-    
+
     for (let i = 0; i < size; i++) {
         const row = [];
         for (let j = 0; j < size; j++) {
@@ -202,10 +346,10 @@ function generateQuiz() {
         }
         pattern.push(row);
     }
-    
+
     // Decide question type
     const questionType = Math.random() > 0.5 ? 'color-to-bit' : 'bit-to-color';
-    
+
     if (questionType === 'color-to-bit') {
         generateColorToBitQuiz(pattern, size);
     } else {
@@ -215,13 +359,13 @@ function generateQuiz() {
 
 function generateColorToBitQuiz(pattern, size) {
     document.getElementById('question-text').textContent = '이 색상 패턴의 비트 값은?';
-    
+
     // Display colored pattern
     const display = document.getElementById('quiz-display');
     display.innerHTML = '';
     display.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
     display.style.gridTemplateRows = `repeat(${size}, 1fr)`;
-    
+
     pattern.forEach(row => {
         row.forEach(bit => {
             const cell = document.createElement('div');
@@ -230,15 +374,15 @@ function generateColorToBitQuiz(pattern, size) {
             display.appendChild(cell);
         });
     });
-    
+
     // Generate answer
     const answer = pattern.map(row => row.join(' ')).join('\n');
     currentQuizAnswer = answer;
-    
+
     // Generate options
     const options = [answer];
     while (options.length < 4) {
-        const wrongPattern = pattern.map(row => 
+        const wrongPattern = pattern.map(row =>
             row.map(() => Object.keys(BIT_COLORS)[Math.floor(Math.random() * 4)])
         );
         const wrongAnswer = wrongPattern.map(row => row.join(' ')).join('\n');
@@ -246,20 +390,20 @@ function generateColorToBitQuiz(pattern, size) {
             options.push(wrongAnswer);
         }
     }
-    
+
     shuffleArray(options);
     displayQuizOptions(options);
 }
 
 function generateBitToColorQuiz(pattern, size) {
     document.getElementById('question-text').textContent = '이 비트 패턴의 색상은?';
-    
+
     // Display bit pattern
     const display = document.getElementById('quiz-display');
     display.innerHTML = '';
     display.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
     display.style.gridTemplateRows = `repeat(${size}, 1fr)`;
-    
+
     pattern.forEach(row => {
         row.forEach(bit => {
             const cell = document.createElement('div');
@@ -276,27 +420,27 @@ function generateBitToColorQuiz(pattern, size) {
             display.appendChild(cell);
         });
     });
-    
+
     // Generate answer (color names)
-    const answer = pattern.map(row => 
+    const answer = pattern.map(row =>
         row.map(bit => BIT_COLORS[bit].name).join(' ')
     ).join('\n');
     currentQuizAnswer = answer;
-    
+
     // Generate options
     const options = [answer];
     while (options.length < 4) {
-        const wrongPattern = pattern.map(row => 
+        const wrongPattern = pattern.map(row =>
             row.map(() => Object.keys(BIT_COLORS)[Math.floor(Math.random() * 4)])
         );
-        const wrongAnswer = wrongPattern.map(row => 
+        const wrongAnswer = wrongPattern.map(row =>
             row.map(bit => BIT_COLORS[bit].name).join(' ')
         ).join('\n');
         if (!options.includes(wrongAnswer)) {
             options.push(wrongAnswer);
         }
     }
-    
+
     shuffleArray(options);
     displayQuizOptions(options);
 }
@@ -304,7 +448,7 @@ function generateBitToColorQuiz(pattern, size) {
 function displayQuizOptions(options) {
     const container = document.getElementById('quiz-options');
     container.innerHTML = '';
-    
+
     options.forEach(option => {
         const btn = document.createElement('button');
         btn.className = 'quiz-option';
@@ -316,10 +460,10 @@ function displayQuizOptions(options) {
 
 function checkAnswer(btn, selected) {
     if (quizAnswered) return;
-    
+
     quizAnswered = true;
     const isCorrect = selected === currentQuizAnswer;
-    
+
     document.querySelectorAll('.quiz-option').forEach(option => {
         if (option.textContent === currentQuizAnswer) {
             option.classList.add('correct');
@@ -328,10 +472,10 @@ function checkAnswer(btn, selected) {
         }
         option.style.pointerEvents = 'none';
     });
-    
+
     const feedback = document.getElementById('quiz-feedback');
     feedback.classList.remove('hidden');
-    
+
     if (isCorrect) {
         quizCorrect++;
         feedback.textContent = '🎉 정답입니다!';
@@ -341,14 +485,14 @@ function checkAnswer(btn, selected) {
         feedback.textContent = '❌ 틀렸습니다. 정답을 확인하세요!';
         feedback.className = 'quiz-feedback wrong';
     }
-    
+
     updateQuizStats();
 }
 
 function updateQuizStats() {
     document.getElementById('correct-count').textContent = quizCorrect;
     document.getElementById('wrong-count').textContent = quizWrong;
-    
+
     const total = quizCorrect + quizWrong;
     const accuracy = total > 0 ? Math.round((quizCorrect / total) * 100) : 0;
     document.getElementById('accuracy').textContent = accuracy + '%';
@@ -359,14 +503,14 @@ function initModeSelector() {
     document.querySelectorAll('.mode-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             const mode = btn.dataset.mode;
-            
+
             document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            
+
             document.querySelectorAll('.practice-section').forEach(section => {
                 section.classList.add('hidden');
             });
-            
+
             if (mode === 'draw') {
                 document.getElementById('draw-mode').classList.remove('hidden');
             } else {

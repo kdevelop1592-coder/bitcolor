@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,9 +8,12 @@
     <meta name="description" content="비트 표현과 색상 매핑을 학습하고 연습할 수 있는 인터랙티브 웹사이트">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
     <div class="container">
         <header class="header">
@@ -28,21 +32,25 @@
                     <div class="bit-display">00</div>
                     <div class="color-box color-black"></div>
                     <div class="color-name">검정</div>
+                    <button class="edit-color-btn" title="색상 편집">✏️</button>
                 </div>
                 <div class="reference-item" data-bit="01">
                     <div class="bit-display">01</div>
                     <div class="color-box color-blue"></div>
                     <div class="color-name">파랑</div>
+                    <button class="edit-color-btn" title="색상 편집">✏️</button>
                 </div>
                 <div class="reference-item" data-bit="10">
                     <div class="bit-display">10</div>
                     <div class="color-box color-yellow"></div>
                     <div class="color-name">노랑</div>
+                    <button class="edit-color-btn" title="색상 편집">✏️</button>
                 </div>
                 <div class="reference-item" data-bit="11">
                     <div class="bit-display">11</div>
                     <div class="color-box color-gray"></div>
                     <div class="color-name">회색</div>
+                    <button class="edit-color-btn" title="색상 편집">✏️</button>
                 </div>
             </div>
         </section>
@@ -86,6 +94,38 @@
             </div>
         </section>
 
+        <!-- Color Edit Modal -->
+        <div id="color-edit-modal" class="modal hidden">
+            <div class="modal-overlay"></div>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>색상 편집</h3>
+                    <button class="modal-close" id="close-modal">✕</button>
+                </div>
+                <div class="modal-body">
+                    <div class="edit-bit-display">
+                        <span class="edit-bit-label">비트:</span>
+                        <span class="edit-bit-value" id="edit-bit-value">00</span>
+                    </div>
+                    <div class="color-preview-container">
+                        <div class="color-preview" id="color-preview"></div>
+                    </div>
+                    <div class="input-group">
+                        <label for="hex-input">Hex 색상 코드</label>
+                        <input type="text" id="hex-input" placeholder="#000000" maxlength="7">
+                    </div>
+                    <div class="input-group">
+                        <label for="color-picker">색상 선택</label>
+                        <input type="color" id="color-picker" value="#000000">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" id="cancel-edit">취소</button>
+                    <button class="btn btn-primary" id="save-color">저장</button>
+                </div>
+            </div>
+        </div>
+
         <!-- Quiz Mode -->
         <section class="practice-section hidden" id="quiz-mode">
             <h2 class="section-title">퀴즈</h2>
@@ -121,4 +161,5 @@
 
     <script src="script.js"></script>
 </body>
+
 </html>
