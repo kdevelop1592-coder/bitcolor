@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>비트와 색상 학습 - Bit Color Practice</title>
+    <meta name="description" content="비트 표현과 색상 매핑을 학습하고 연습할 수 있는 인터랙티브 웹사이트">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1 class="title">
+                <span class="title-icon">🎨</span>
+                비트와 색상 학습
+            </h1>
+            <p class="subtitle">비트 표현을 색상으로 변환하는 방법을 배워보세요</p>
+        </header>
+
+        <!-- Reference Table -->
+        <section class="reference-section">
+            <h2 class="section-title">📚 참조 테이블</h2>
+            <div class="reference-table">
+                <div class="reference-item" data-bit="00">
+                    <div class="bit-display">00</div>
+                    <div class="color-box color-black"></div>
+                    <div class="color-name">검정</div>
+                </div>
+                <div class="reference-item" data-bit="01">
+                    <div class="bit-display">01</div>
+                    <div class="color-box color-blue"></div>
+                    <div class="color-name">파랑</div>
+                </div>
+                <div class="reference-item" data-bit="10">
+                    <div class="bit-display">10</div>
+                    <div class="color-box color-yellow"></div>
+                    <div class="color-name">노랑</div>
+                </div>
+                <div class="reference-item" data-bit="11">
+                    <div class="bit-display">11</div>
+                    <div class="color-box color-gray"></div>
+                    <div class="color-name">회색</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Practice Mode Selector -->
+        <section class="mode-selector">
+            <button class="mode-btn active" data-mode="draw">🎨 그리기 모드</button>
+            <button class="mode-btn" data-mode="quiz">✏️ 퀴즈 모드</button>
+        </section>
+
+        <!-- Drawing Mode -->
+        <section class="practice-section" id="draw-mode">
+            <h2 class="section-title">그리기 연습</h2>
+            <div class="controls">
+                <div class="color-palette">
+                    <button class="palette-btn active" data-color="00" title="검정 (00)">
+                        <div class="palette-color color-black"></div>
+                        <span>00</span>
+                    </button>
+                    <button class="palette-btn" data-color="01" title="파랑 (01)">
+                        <div class="palette-color color-blue"></div>
+                        <span>01</span>
+                    </button>
+                    <button class="palette-btn" data-color="10" title="노랑 (10)">
+                        <div class="palette-color color-yellow"></div>
+                        <span>10</span>
+                    </button>
+                    <button class="palette-btn" data-color="11" title="회색 (11)">
+                        <div class="palette-color color-gray"></div>
+                        <span>11</span>
+                    </button>
+                </div>
+                <div class="action-buttons">
+                    <button class="btn btn-secondary" id="clear-canvas">🗑️ 지우기</button>
+                    <button class="btn btn-secondary" id="toggle-bits">👁️ 비트 보기</button>
+                </div>
+            </div>
+            <div class="canvas-container">
+                <canvas id="drawing-canvas"></canvas>
+                <div id="bit-overlay" class="bit-overlay hidden"></div>
+            </div>
+        </section>
+
+        <!-- Quiz Mode -->
+        <section class="practice-section hidden" id="quiz-mode">
+            <h2 class="section-title">퀴즈</h2>
+            <div class="quiz-stats">
+                <div class="stat-item">
+                    <span class="stat-label">정답</span>
+                    <span class="stat-value" id="correct-count">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">오답</span>
+                    <span class="stat-value" id="wrong-count">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">정확도</span>
+                    <span class="stat-value" id="accuracy">0%</span>
+                </div>
+            </div>
+            <div class="quiz-container">
+                <div class="quiz-question">
+                    <p class="question-text" id="question-text">비트 값을 선택하세요</p>
+                    <div class="quiz-display" id="quiz-display"></div>
+                </div>
+                <div class="quiz-options" id="quiz-options"></div>
+                <div class="quiz-feedback hidden" id="quiz-feedback"></div>
+            </div>
+            <button class="btn btn-primary" id="next-question">다음 문제</button>
+        </section>
+
+        <footer class="footer">
+            <p>Made with ❤️ for learning | <a href="https://github.com" target="_blank">GitHub</a></p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
